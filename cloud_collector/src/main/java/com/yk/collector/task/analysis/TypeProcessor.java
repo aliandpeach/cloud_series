@@ -9,6 +9,9 @@ public class TypeProcessor implements ITypeProcessor {
 
     private Buffer<DataPacket> packetBuffer;
 
+    public TypeProcessor(Buffer<DataPacket> packetBuffer) {
+        this.packetBuffer = packetBuffer;
+    }
 
     /**
      * processer
