@@ -1,13 +1,15 @@
-package com.yk.collector.task;
+package com.yk.collector.task.producer;
 
 import com.yk.collector.task.storage.Buffer;
-import com.yk.collector.task.storage.DataPacket;
 
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
-public abstract class AbstractProducerConsumer<T> extends Thread {
+public abstract class AbstractProducer<T> extends Thread {
     private ReentrantLock lock = new ReentrantLock();
+
+    private LinkedBlockingQueue<T> bufferQueue = new LinkedBlockingQueue<T>();
 
     private Buffer<T> packetBuffer;
 
@@ -19,7 +21,6 @@ public abstract class AbstractProducerConsumer<T> extends Thread {
     public void run() {
         while (true) {
             List<T> buffers = packetBuffer.getBuffer();
-
             processPacket(buffers);
         }
     }
@@ -28,5 +29,9 @@ public abstract class AbstractProducerConsumer<T> extends Thread {
 
     public void setPacketBuffer(Buffer<T> packetBuffer) {
         this.packetBuffer = packetBuffer;
+    }
+
+    public void setBufferQueue(LinkedBlockingQueue<T> bufferQueue) {
+        this.bufferQueue = bufferQueue;
     }
 }
