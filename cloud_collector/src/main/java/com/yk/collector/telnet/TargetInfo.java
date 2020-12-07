@@ -8,7 +8,7 @@ public class TargetInfo {
 
     private String username;
 
-    private char[] pwd;
+    private StringBuffer pwd;
 
     public String getIp() {
         return ip;
@@ -26,11 +26,11 @@ public class TargetInfo {
         this.username = username;
     }
 
-    public char[] getPwd() {
+    public StringBuffer getPwd() {
         return pwd;
     }
 
-    public void setPwd(char[] pwd) {
+    public void setPwd(StringBuffer pwd) {
         this.pwd = pwd;
     }
 
@@ -44,7 +44,6 @@ public class TargetInfo {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(ip, username);
-        return result;
+        return Objects.hash(ip);
     }
 }

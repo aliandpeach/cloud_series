@@ -24,10 +24,15 @@ public class TelnetConnector {
     private BufferedInputStream in;
 
     public String getResult() {
-        return null;
+
+        StringBuffer result = new StringBuffer();
+        while (true) {
+            break;
+        }
+        return result.toString();
     }
 
-    public void connect() {
+    public void connect(String username, StringBuffer pwd) {
 
     }
 

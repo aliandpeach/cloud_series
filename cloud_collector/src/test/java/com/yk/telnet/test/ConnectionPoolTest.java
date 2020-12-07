@@ -6,6 +6,9 @@ import com.yk.collector.telnet.TargetInfo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class ConnectionPoolTest {
     public static void main(String[] args) {
@@ -14,35 +17,48 @@ public class ConnectionPoolTest {
             TargetInfo target = new TargetInfo();
             target.setIp("192.168.32." + i);
             target.setUsername("username" + i);
-            target.setPwd(new char[]{'p', 'w', 'd', (char) i});
+            target.setPwd(new StringBuffer("pwd" + i));
             targets.add(target);
+        }
+
+        ExecutorService service = Executors.newFixedThreadPool(10);
+
+        service.submit(new Thread(() -> {
+            for (TargetInfo t : targets) {
+                CmdConnectionTool tool = ConnectionPool.getInstance().getConnectionTool(t);
+                tool.cmdExecute(t, "cmd1=" + t.getIp());
+            }
+        }));
+        service.submit(new Thread(() -> {
+            for (TargetInfo t : targets) {
+                CmdConnectionTool tool = ConnectionPool.getInstance().getConnectionTool(t);
+                tool.cmdExecute(t, "cmd2=" + t.getIp());
+            }
+        }));
+        service.submit(new Thread(() -> {
+            for (TargetInfo t : targets) {
+                CmdConnectionTool tool = ConnectionPool.getInstance().getConnectionTool(t);
+                tool.cmdExecute(t, "cmd3=" + t.getIp());
+            }
+        }));
+        service.shutdown();
+        try {
+            service.awaitTermination(30, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
         new Thread(() -> {
             for (TargetInfo t : targets) {
-                CmdConnectionTool tool = ConnectionPool.getInstance().connectionTool(t);
-                tool.cmdExecute(t, "cmd=" + t.getIp());
-            }
-        }).start();
-        new Thread(() -> {
-            for (TargetInfo t : targets) {
-                CmdConnectionTool tool = ConnectionPool.getInstance().connectionTool(t);
-                tool.cmdExecute(t, "cmd=" + t.getIp());
-            }
-        }).start();
-        new Thread(() -> {
-            for (TargetInfo t : targets) {
-                CmdConnectionTool tool = ConnectionPool.getInstance().connectionTool(t);
-                tool.cmdExecute(t, "cmd=" + t.getIp());
-            }
-        }).start();
-        new Thread(() -> {
-            for (TargetInfo t : targets) {
-                CmdConnectionTool tool = ConnectionPool.getInstance().connectionTool(t);
-                tool.cmdExecute(t, "cmd=" + t.getIp());
+                CmdConnectionTool tool = ConnectionPool.getInstance().getConnectionTool(t);
+                tool.cmdExecute(t, "cmd4=" + t.getIp());
             }
         }).start();
 
-
+        new Thread(() -> {
+            for (TargetInfo t : targets) {
+                ConnectionPool.getInstance().releaseConnectionTool(t);
+            }
+        }).start();
     }
 }
