@@ -11,6 +11,8 @@
 
     <modules>
         <module>cloud_collector</module>
+        <module>msg_client</module>
+        <module>msg_impl</module>
     </modules>
 
 </project>

@@ -3,6 +3,7 @@ package com.yk.telnet.test;
 import com.yk.collector.telnet.CmdConnectionTool;
 import com.yk.collector.telnet.ConnectionPool;
 import com.yk.collector.telnet.TargetInfo;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +12,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class ConnectionPoolTest {
-    public static void main(String[] args) {
+
+    @Test
+    public void main() {
         List<TargetInfo> targets = new ArrayList<>();
         for (int i = 1; i <= 20; i++) {
             TargetInfo target = new TargetInfo();
