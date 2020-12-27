@@ -28,7 +28,7 @@ public class ConsumerImpl<K, V> implements IConsumer<K, V> {
     private final Object lock = new Object();
 
     public ConsumerImpl(Properties customerConfig) {
-        properties = ConfigUtil.loadConfig();
+        properties = ConfigUtil.consumerConfigs();
         properties.putAll(customerConfig);
     }
 

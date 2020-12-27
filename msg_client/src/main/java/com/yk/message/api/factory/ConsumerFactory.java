@@ -1,7 +1,7 @@
 package com.yk.message.api.factory;
 
 import com.yk.message.api.consumer.IConsumer;
-import com.yk.message.api.util.ApiClassLoader;
+import com.yk.message.api.util.MsgClassLoader;
 
 import java.util.Map;
 
@@ -11,7 +11,7 @@ public class ConsumerFactory<K, V> extends AbstractConsumerFactory<K, V> {
 
     private ConsumerFactory() {
         try {
-            ApiClassLoader.getInstance().getLoader().loadClass("").newInstance();
+            factory = (AbstractConsumerFactory) MsgClassLoader.getInstance().getLoader().loadClass("com.yk.message.impl.factory.ConsumerFactory").newInstance();
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {

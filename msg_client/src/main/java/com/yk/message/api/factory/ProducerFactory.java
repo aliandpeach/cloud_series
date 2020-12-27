@@ -1,7 +1,7 @@
 package com.yk.message.api.factory;
 
 import com.yk.message.api.producer.IProducer;
-import com.yk.message.api.util.ApiClassLoader;
+import com.yk.message.api.util.MsgClassLoader;
 
 import java.util.Map;
 
@@ -11,7 +11,7 @@ public class ProducerFactory<K, V> extends AbstractProducerFactory<K, V> {
 
     private ProducerFactory() {
         try {
-            ApiClassLoader.getInstance().getLoader().loadClass("").newInstance();
+            factory = (AbstractProducerFactory) MsgClassLoader.getInstance().getLoader().loadClass("com.yk.message.impl.factory.ProducerFactory").newInstance();
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {

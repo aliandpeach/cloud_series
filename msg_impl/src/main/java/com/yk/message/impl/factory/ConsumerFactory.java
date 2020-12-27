@@ -13,10 +13,10 @@ public class ConsumerFactory<K, V> extends AbstractConsumerFactory<K, V> {
     @Override
     public IConsumer<K, V> getConsumer(Map<String, Object> customerParams) {
         Properties pro = new Properties();
-        Optional.ofNullable(customerParams).get().entrySet().stream().map(t -> {
-            pro.put(t.getKey(), t.getValue());
+        Optional.ofNullable(customerParams).ifPresent(t -> t.entrySet().stream().map(s -> {
+            pro.put(s.getKey(), s.getValue());
             return pro;
-        });
+        }));
         return new ConsumerImpl<K, V>(pro);
     }
 }
