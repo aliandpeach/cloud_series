@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.concurrent.Future;
 
 public interface IProducer<K, V> {
-    Future<RecordMetadata> send(ProducerRecord<K, V> producerRecord);
+    List<Future<RecordMetadata>> send(ProducerRecord<K, V> producerRecord);
 
-    Future<RecordMetadata> send(ProducerRecord<K, V> producerRecord, Callback callback);
+    List<Future<RecordMetadata>> send(ProducerRecord<K, V> producerRecord, Callback callback);
 
     long lastOffset(TopicPartition partition);
 

@@ -26,7 +26,7 @@ public class ProducerImpl<K, V> implements IProducer<K, V> {
         props = ConfigUtil.producerConfigs();
     }
 
-    public Future<RecordMetadata> send(ProducerRecord<K, V> producerRecord) {
+    public List<Future<RecordMetadata>> send(ProducerRecord<K, V> producerRecord) {
         KafkaProducer<K, V> kvKafkaProducer = kafkaProducerMap.get(producerRecord.topic());
         synchronized (this) {
             if (null == kvKafkaProducer) {
@@ -37,7 +37,7 @@ public class ProducerImpl<K, V> implements IProducer<K, V> {
         return this.send(producerRecord, null);
     }
 
-    public Future<RecordMetadata> send(ProducerRecord<K, V> producerRecord, Callback callback) {
+    public List<Future<RecordMetadata>> send(ProducerRecord<K, V> producerRecord, Callback callback) {
         KafkaProducer<K, V> kvKafkaProducer = kafkaProducerMap.get(producerRecord.topic());
         synchronized (this) {
             if (null == kvKafkaProducer) {
@@ -46,7 +46,8 @@ public class ProducerImpl<K, V> implements IProducer<K, V> {
             }
         }
 
-        Future<RecordMetadata> metadataFutureList = kafkaProducerMap.get(producerRecord.topic()).send(producerRecord, callback);
+        List<Future<RecordMetadata>> metadataFutureList = kafkaProducerMap.entrySet()
+                .stream().map(entry -> entry.getValue().send(producerRecord, callback)).collect(Collectors.toCollection(() -> new ArrayList<>()));
         return metadataFutureList;
     }
 
