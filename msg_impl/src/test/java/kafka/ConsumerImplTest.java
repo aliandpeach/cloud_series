@@ -15,6 +15,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,32 +23,61 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
 
 public class ConsumerImplTest {
     @Test
     public void test() {
         Map<String, Object> params = new HashMap<>();
-        params.put(ConsumerConfig.GROUP_ID_CONFIG, "test_group");
+        params.put(ConsumerConfig.GROUP_ID_CONFIG, "0");
         IConsumer consumer = new ConsumerFactory<>().getConsumer(params);
-        consumer.subscribe(Arrays.asList("test"));
+        consumer.subscribe(Arrays.asList("testz"));
 
         while (true) {
-            List<ConsumerRecords<String, String>> consumerRecords = consumer.poll(1000);
+            List<ConsumerRecords<String, String>> consumerRecords = consumer.poll(300);
             for (ConsumerRecords<String, String> list : consumerRecords) {
-                consumer.pause(list.partitions());
-
-                for (TopicPartition partition : list.partitions()) {
-                    List<ConsumerRecord<String, String>> partitionRecords = list.records(partition);
-                    // 数据处理
-                    for (ConsumerRecord<String, String> record : partitionRecords) {
-                        System.out.println(record.offset() + ": " + record.value());
-                    }
-                    // 取得当前读取到的最后一条记录的offset
-                    long lastOffset = partitionRecords.get(partitionRecords.size() - 1).offset();
-                    // 提交offset，记得要 + 1
-                    consumer.commitSync(Collections.singletonMap(partition, new OffsetAndMetadata(lastOffset + 1)));
+                if (list.isEmpty()) {
+                    continue;
                 }
-                consumer.resume(list.partitions());
+                for (ConsumerRecord<String, String> record : list) {
+                    String topic = record.topic();
+                    int partition = record.partition();
+                    TopicPartition topicPartition = new TopicPartition(topic, partition);
+                    List<CompletableFuture<Void>> cfs = new ArrayList<>();
+                    try {
+                        consumer.pause(Collections.singleton(topicPartition));
+                        List<ConsumerRecord<String, String>> partitionRecords = list.records(topicPartition);
+
+                        long lastOffset = partitionRecords.get(partitionRecords.size() - 1).offset();
+                        long current = partitionRecords.get(0).offset();
+                        for (ConsumerRecord<String, String> record1 : partitionRecords) {
+                            cfs.add(CompletableFuture.runAsync(() -> {
+                                System.out.println(record1.offset() + ": " + record1.value());
+                            }));
+                        }
+                        CompletableFuture.allOf(cfs.toArray(new CompletableFuture[0])).join();
+                        consumer.commitSync(Collections.singletonMap(topicPartition, new OffsetAndMetadata(lastOffset + 1)));
+                    } finally {
+                        consumer.resume(Collections.singleton(topicPartition));
+                    }
+                }
+
+//                consumer.pause(list.partitions());
+//
+//                for (TopicPartition partition : list.partitions()) {
+//                    List<ConsumerRecord<String, String>> partitionRecords = list.records(partition);
+//                    // 数据处理
+//                    for (ConsumerRecord<String, String> record : partitionRecords) {
+//                        System.out.println(record.offset() + ": " + record.value());
+//                        String topic = record.topic();
+//                        int part = record.partition();
+//                    }
+//                    // 取得当前读取到的最后一条记录的offset
+//                    long lastOffset = partitionRecords.get(partitionRecords.size() - 1).offset();
+//                    // 提交offset，记得要 + 1
+//                    consumer.commitSync(Collections.singletonMap(partition, new OffsetAndMetadata(lastOffset + 1)));
+//                }
+//                consumer.resume(list.partitions());
             }
         }
     }

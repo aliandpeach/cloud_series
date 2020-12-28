@@ -23,7 +23,7 @@ public class ProducerImplTest {
     public void test() throws ExecutionException, InterruptedException {
         Map<String, Object> params = new HashMap<>();
         IProducer<String, String> producer = new ProducerFactory<String, String>().getProducer(params);
-        List<Future<RecordMetadata>> futureList = producer.send(new ProducerRecord<String, String>("test", "test1-" + new Random().nextDouble()),
+        List<Future<RecordMetadata>> futureList = producer.send(new ProducerRecord<String, String>("testz", "test1-" + new Random().nextDouble()),
                 new Callback() {
                     @Override
                     public void onCompletion(RecordMetadata metadata, Exception exception) {
@@ -32,7 +32,7 @@ public class ProducerImplTest {
                 }
         );
 
-        futureList = producer.send(new ProducerRecord<String, String>("test", "test2-" + new Random().nextDouble()),
+        futureList = producer.send(new ProducerRecord<String, String>("testz", "test2-" + new Random().nextDouble()),
                 new Callback() {
                     @Override
                     public void onCompletion(RecordMetadata metadata, Exception exception) {
