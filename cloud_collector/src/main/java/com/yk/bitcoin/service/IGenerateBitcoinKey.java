@@ -1,9 +1,8 @@
 package com.yk.bitcoin.service;
 
-import com.yk.bitcoin.manager.Base58;
-import com.yk.bitcoin.manager.KeyPair;
-import com.yk.bitcoin.manager.Sha256Hash;
-import com.yk.bitcoin.manager.Utils;
+import com.yk.crypto.Base58;
+import com.yk.crypto.Sha256Hash;
+import com.yk.crypto.Utils;
 import org.bitcoinj.core.ECKey;
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 import org.bouncycastle.jce.ECNamedCurveTable;

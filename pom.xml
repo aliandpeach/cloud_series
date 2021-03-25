@@ -14,5 +14,11 @@
         <module>msg_client</module>
         <module>msg_impl</module>
     </modules>
-
+    <dependencies>
+        <dependency>
+            <groupId>com.yk.spring.pro</groupId>
+            <artifactId>commons-utils</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 </project>

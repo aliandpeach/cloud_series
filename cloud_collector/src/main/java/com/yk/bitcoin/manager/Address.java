@@ -1,16 +1,7 @@
 package com.yk.bitcoin.manager;
 
 import com.google.common.primitives.UnsignedBytes;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
+import com.yk.crypto.Base58;
 
 public class Address implements Comparable<Address> {
 
