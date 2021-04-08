@@ -1,10 +1,9 @@
 package com.yk.key;
 
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.yk.bitcoin.manager.Base58;
-import com.yk.bitcoin.manager.Sha256Hash;
-import com.yk.bitcoin.manager.Utils;
+import org.bitcoinj.core.Base58;
+import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.core.Utils;
 import org.junit.Test;
 
 import java.math.BigInteger;

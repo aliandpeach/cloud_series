@@ -1,5 +1,8 @@
 package com.yk.bitcoin.manager;
 
+import org.bitcoinj.core.Base58;
+import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.core.Utils;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
