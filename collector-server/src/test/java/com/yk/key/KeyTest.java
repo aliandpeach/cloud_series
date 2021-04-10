@@ -1,6 +1,8 @@
 package com.yk.key;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.yk.crypto.BinHexSHAUtil;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.Utils;
@@ -30,13 +32,15 @@ public class KeyTest {
         String b = jsonArray.toJSONString();
         Object a = JSONArray.parse("[\"aaa\",\"bbb\",\"ccc\"]");
 
-        keyGen("1", true);
+        /*keyGen("1", true);
         keyGen("12", true);
         keyGen("123", true);
         keyGen("1234", true);
         keyGen("12345", true);
         keyGen("123456", true);
-        keyGen("1234567", true);
+        keyGen("1234567", true);x     0
+        2222222222222
+
         keyGen("12345678", true);
         keyGen("123456789", true);
         keyGen("123456789A", true);
@@ -45,7 +49,10 @@ public class KeyTest {
         keyGen("123456789ABCD", true);
         keyGen("123456789ABCDE", true);
         keyGen("123456789ABCDEF", true);
-        keyGen("9", true);
+        keyGen("9", true);*/
+        byte [] bytes = "Satoshi Nakamoto".getBytes();
+        String hex_ = BinHexSHAUtil.byteArrayToHex(Sha256Hash.hash(bytes));
+        keyGen(hex_, true);
 //        byte[] bytesA = Utils.removeBytesFirst0FromBigInteger(new BigInteger(stringBuilder.toString(), 2).toByteArray(), 32);
 //        byte[] bytesB = Utils.string2bytes(stringBuilder.toString());
 //        System.out.println(bytesA.equals(bytesB));

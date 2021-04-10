@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>cloud_collector</artifactId>
+    <artifactId>collector-server</artifactId>
     <packaging>jar</packaging>
 
     <!-- 2.1.7.RELEASE : Annotation-specified bean name 'filter' for bean class [com.alibaba.druid.filter.Filter] conflicts with existing, non-compatible bean definition of same name and class [com.fasterxml.classmate.Filter] -->

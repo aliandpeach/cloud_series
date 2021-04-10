@@ -10,9 +10,9 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>cloud_collector</module>
-        <module>msg_client</module>
-        <module>msg_impl</module>
+        <module>collector-server</module>
+        <module>kafka-client</module>
+        <module>kafka-impl</module>
     </modules>
     <dependencies>
         <dependency>

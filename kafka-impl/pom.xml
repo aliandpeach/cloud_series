@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>msg_impl</artifactId>
+    <artifactId>kafka-impl</artifactId>
 
     <packaging>jar</packaging>
 
