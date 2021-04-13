@@ -8,12 +8,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 
-public class ConsumerFactory<K, V> extends AbstractConsumerFactory<K, V> {
-
+public class ConsumerFactory<K, V> extends AbstractConsumerFactory<K, V>
+{
     @Override
-    public IConsumer<K, V> getConsumer(Map<String, Object> customerParams) {
+    public IConsumer<K, V> getConsumer(Map<String, Object> customerParams)
+    {
         Properties pro = new Properties();
-        Optional.ofNullable(customerParams).ifPresent(t -> t.entrySet().stream().map(s -> {
+        Optional.ofNullable(customerParams).ifPresent(t -> t.entrySet().stream().map(s ->
+        {
             pro.put(s.getKey(), s.getValue());
             return pro;
         }));

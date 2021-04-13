@@ -5,15 +5,15 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
-public class ConfigUtil {
-
+public class ConfigUtil
+{
+    
     private static final String BROKER_LIST = "192.168.31.211:9092";
-
-    public static Properties consumerConfigs() {
+    
+    public static Properties consumerConfigs()
+    {
         Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BROKER_LIST);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "0");
@@ -24,9 +24,10 @@ public class ConfigUtil {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         return props;
     }
-
-
-    public static Properties producerConfigs() {
+    
+    
+    public static Properties producerConfigs()
+    {
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BROKER_LIST);
         props.put(ProducerConfig.RETRIES_CONFIG, 0);
