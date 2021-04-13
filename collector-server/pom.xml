@@ -145,7 +145,7 @@
 
         <dependency>
             <groupId>com.cloud.pro</groupId>
-            <artifactId>msg_client</artifactId>
+            <artifactId>kafka-util-api</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
 

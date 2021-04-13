@@ -9,14 +9,14 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>kafka-impl</artifactId>
+    <artifactId>kafka-util-impl</artifactId>
 
     <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
             <groupId>com.cloud.pro</groupId>
-            <artifactId>msg_client</artifactId>
+            <artifactId>kafka-util-api</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>

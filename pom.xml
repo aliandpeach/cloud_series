@@ -11,8 +11,8 @@
 
     <modules>
         <module>collector-server</module>
-        <module>kafka-client</module>
-        <module>kafka-impl</module>
+        <module>kafka-util-api</module>
+        <module>kafka-util-impl</module>
     </modules>
     <dependencies>
         <dependency>
