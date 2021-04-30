@@ -1,6 +1,6 @@
 spring:
   application:
-    name: micro-service-kafka
+    name: micro-service-collector
   security:
     user:
       name: user
@@ -8,7 +8,7 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driverClassName: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:13306/xywl_online_1?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC&useSSL=false
+    url: jdbc:mysql://127.0.0.1:13306/xywl_online_1?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC&useSSL=false
     username: root
     password: root
     hikari: # 使用hikari 连接池
@@ -23,10 +23,15 @@ spring:
   redis:
     host: 127.0.0.1
     port: 6379
-    password: # Redis 服务器密码，默认为空。生产中，一定要设置 Redis 密码！
-    database: 0 # Redis 数据库号，默认为 0 。
-    timeout: 0 # Redis 连接超时时间，单位：毫秒。
-    # 对应 RedisProperties.Jedis 内部类
+    password:     # Redis 服务器密码，默认为空。生产中，一定要设置 Redis 密码！
+    database: 0   # Redis 数据库号，默认为 0 。
+    timeout: 5000 # Redis 连接超时时间，单位：毫秒。
+    lettuce:
+      pool:
+        max-active: 8 # 连接池最大连接数，默认为 8 。使用负数表示没有限制。
+        max-idle: 8 # 默认连接数最大空闲的连接数，默认为 8 。使用负数表示没有限制。
+        min-idle: 0 # 默认连接池最小空闲的连接数，默认为 0 。允许设置 0 和 正数。
+        max-wait: -1 # 连接池最大阻塞等待时间，单位：毫秒。默认为 -1 ，表示不限制
     jedis:
       pool:
         max-active: 8 # 连接池最大连接数，默认为 8 。使用负数表示没有限制。
