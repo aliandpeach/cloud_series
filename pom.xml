@@ -10,9 +10,10 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>collector-server</module>
         <module>kafka-util-api</module>
         <module>kafka-util-impl</module>
+        <module>collector-server</module>
+        <module>es-6.3.2-tool</module>
     </modules>
     <dependencies>
         <dependency>

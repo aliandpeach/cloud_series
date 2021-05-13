@@ -1,0 +1,70 @@
+spring:
+  application:
+    name: micro-service-collector
+  security:
+    user:
+      name: user
+      password: Admin@123
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:13306/xywl_online_1?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC&useSSL=false
+    username: root
+    password: root
+    hikari: # 使用hikari 连接池
+      maximumPoolSize: 15
+      minimumIdle: 5
+      idleTimeout: 30000
+      connectionTimeout: 30000
+      maxLifetime: 1800000
+      connectionTestQuery: SELECT 1
+      poolName: DatebookHikariCP
+      autoCommit: true
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password:     # Redis 服务器密码，默认为空。生产中，一定要设置 Redis 密码！
+    database: 0   # Redis 数据库号，默认为 0 。
+    timeout: 5000 # Redis 连接超时时间，单位：毫秒。
+    lettuce:
+      pool:
+        max-active: 8 # 连接池最大连接数，默认为 8 。使用负数表示没有限制。
+        max-idle: 8 # 默认连接数最大空闲的连接数，默认为 8 。使用负数表示没有限制。
+        min-idle: 0 # 默认连接池最小空闲的连接数，默认为 0 。允许设置 0 和 正数。
+        max-wait: -1 # 连接池最大阻塞等待时间，单位：毫秒。默认为 -1 ，表示不限制
+    jedis:
+      pool:
+        max-active: 8 # 连接池最大连接数，默认为 8 。使用负数表示没有限制。
+        max-idle: 8 # 默认连接数最大空闲的连接数，默认为 8 。使用负数表示没有限制。
+        min-idle: 0 # 默认连接池最小空闲的连接数，默认为 0 。允许设置 0 和 正数。
+        max-wait: -1 # 连接池最大阻塞等待时间，单位：毫秒。默认为 -1 ，表示不限制。
+  data:
+    # https://blog.csdn.net/weixin_45566322/article/details/107644082
+    elasticsearch:
+
+      # 该配置自动装配 TransportClient 将被废弃;
+      # 1. 配置 cluster-nodes 自动装配 ElasticsearchAutoConfiguration 生成bean elasticsearchClient (TransportClient)
+      # 2. 然后通过自动装配 ElasticsearchDataAutoConfiguration 生成bean elasticsearchTemplate
+      #cluster-name: my-application
+      #cluster-nodes: 192.190.116.205:9300
+
+#      repositories:
+#        enabled: true # 用于自动装配 ReactiveElasticsearchRepositoriesAutoConfiguration 本例中暂时不用
+
+#      client:                              # 2.自动装配 ElasticsearchDataAutoConfiguration 根据 reactiveElasticsearchClient 最终自动生成bean reactiveElasticsearchTemplate
+#        reactive:
+#          endpoints: 192.190.116.205:9200  # 1.自动装配 ReactiveRestClientAutoConfiguration 生成bean reactiveElasticsearchClient
+
+  elasticsearch:                         # 2.自动装配 ElasticsearchDataAutoConfiguration 根据 elasticsearchRestHighLevelClient 最终自动生成bean elasticsearchTemplate(ElasticsearchRestTemplate)
+    rest:
+      uris: http://192.190.116.205:9200  # 1.自动装配 RestClientAutoConfiguration 生成bean elasticsearchRestHighLevelClient
+server:
+  port: 9023
+  servlet:
+    context-path: /
+  ssl:
+    enabled: true
+    key-store: classpath:key/website_a.jks
+    key-password: Admin@1234
+    key-store-type: JKS
+    key-store-password: Admin@123

@@ -68,6 +68,18 @@ spring:
     listener:
       type: BATCH # 监听器类型，默认为 SINGLE ，只监听单条消息。这里我们配置 BATCH ，监听多条消息，批量消费
       missing-topics-fatal: false # 消费监听接口监听的主题不存在时，默认会报错。所以通过设置为 false ，解决报错
+  elasticsearch:
+    rest:
+      uris: localhost:9200
+      username: elastic
+      password: elastic
+  data:
+    elasticsearch:
+      repositories:
+       enabled: true
+      client:
+        reactive:
+          endpoints: localhost:9200
 logging:
   level:
     org:
@@ -80,7 +92,7 @@ server:
   servlet:
     context-path: /
   ssl:
-    enable: true
+    enabled: true
     key-store: classpath:key/website_a.jks
     key-password: Admin@1234
     key-store-type: JKS
