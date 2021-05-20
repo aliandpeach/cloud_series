@@ -9,6 +9,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.Thread.currentThread;
 
@@ -36,9 +38,10 @@ public class ThreadLimitTest
     @Test
     public void test() throws InterruptedException
     {
-        RateLimiter rateLimiter = RateLimiter.create(0.2);
-        ExecutorService executor = Executors.newFixedThreadPool(10);
-        for (int i = 0; i < 5; i++)
+        RateLimiter rateLimiter = RateLimiter.create(120);
+        ExecutorService executor = Executors.newFixedThreadPool(5);
+        AtomicInteger counter = new AtomicInteger(0);
+        for (int i = 0; i < 3600; i++)
         {
             final int a = i;
             executor.submit(() ->
@@ -50,11 +53,20 @@ public class ThreadLimitTest
 //                    throw new RuntimeException("xx");
 //                }
                 rateLimiter.acquire(1);
-                System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + ", " + a);
+                System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + ", " + counter.incrementAndGet());
+                try
+                {
+                    TimeUnit.MINUTES.sleep(1);
+                }
+                catch (InterruptedException e)
+                {
+                    e.printStackTrace();
+                }
             });
         }
-        
-        currentThread().join();
+
+        executor.shutdown();
+        executor.awaitTermination(1, TimeUnit.DAYS);
     }
     
     /**

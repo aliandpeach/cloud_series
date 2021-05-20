@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.Callable;
@@ -69,6 +70,9 @@ public class ConnectionPoolTest
     {
         int total = 100;
         int runCount = 5;
+
+        ExecutorService service = Executors.newFixedThreadPool(runCount * 2);
+
         AtomicInteger counter = new AtomicInteger(0);
         Queue<RunThread> list = new LinkedBlockingQueue<>();
         for (int i = 0; i < total; i++)
@@ -90,11 +94,12 @@ public class ConnectionPoolTest
                     continue;
                 }
                 th.setDown(down);
-                th.start();
+                service.submit(th);
             }
             down.await();
         }
-        Thread.currentThread().join();
+        service.shutdown();
+        service.awaitTermination(1, TimeUnit.MINUTES);
     }
 
     /**
@@ -106,7 +111,7 @@ public class ConnectionPoolTest
     public void testCyclicBarrier() throws InterruptedException
     {
         int total = 100;
-        int runCount = 5;
+        int runCount = 20;
 
         AtomicInteger counter = new AtomicInteger(0);
         Queue<RunThreadBarrier> list = new LinkedBlockingQueue<>();
@@ -134,22 +139,12 @@ public class ConnectionPoolTest
                     // (total / runCount) 不一定是整除
                     continue;
                 }
-//                th.setBarrier(cyclicBarrier);
+                th.setBarrier(cyclicBarrier);
                 futures.add(service.submit(th));
             }
-            futures.forEach(f ->
-            {
-                try
-                {
-                    System.out.println(f.get());
-                }
-                catch (InterruptedException | ExecutionException e)
-                {
-                    e.printStackTrace();
-                }
-            });
         }
-        Thread.currentThread().join();
+        service.shutdown();
+        service.awaitTermination(1, TimeUnit.MINUTES);
     }
 
     private class Run implements Runnable
@@ -226,6 +221,8 @@ public class ConnectionPoolTest
             System.out.println("完成" + counter.get());
         });
         System.out.println(result);
+        service.shutdown();
+        service.awaitTermination(1, TimeUnit.MINUTES);
     }
 
     /**
@@ -258,15 +255,14 @@ public class ConnectionPoolTest
                     }
                     list.put("1");
 
-                    TimeUnit.SECONDS.sleep(2);
+                    TimeUnit.SECONDS.sleep(new Random().nextInt(5 - 2 + 1) + 2);
                     counter.incrementAndGet();
                     System.out.println(counter.get() + " end");
-
                     list.take();
-                    synchronized (ConnectionPoolTest.class)
+                    /*synchronized (ConnectionPoolTest.class)
                     {
                         ConnectionPoolTest.class.notifyAll();
-                    }
+                    }*/
                 }
                 catch (Exception e)
                 {
@@ -278,6 +274,9 @@ public class ConnectionPoolTest
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         long end = System.currentTimeMillis();
         System.out.println("总数" + total + " 个请求, 分批异步执行, 完成时间  = {}" + (end - start));
+
+        service.shutdown();
+        service.awaitTermination(1, TimeUnit.MINUTES);
     }
 
     private static class RunThread extends Thread
@@ -302,7 +301,7 @@ public class ConnectionPoolTest
             try
             {
                 System.out.println(Thread.currentThread().getName() + " start");
-                TimeUnit.SECONDS.sleep(2);
+                TimeUnit.SECONDS.sleep(new Random().nextInt(5 - 2 + 1) + 2);
                 System.out.println(Thread.currentThread().getName() + " end");
                 counter.incrementAndGet();
             }
@@ -340,8 +339,8 @@ public class ConnectionPoolTest
             try
             {
 //                System.out.println(Thread.currentThread().getName() + " start");
-                TimeUnit.SECONDS.sleep(2);
-//                System.out.println(Thread.currentThread().getName() + " end");
+                TimeUnit.SECONDS.sleep(new Random().nextInt(5 - 2 + 1) + 2);
+                System.out.println(Thread.currentThread().getName() + " end");
                 return "success" + counter.incrementAndGet();
             }
             catch (InterruptedException e)
