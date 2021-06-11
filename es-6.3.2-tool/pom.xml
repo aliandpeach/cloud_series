@@ -23,6 +23,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
+                <!-- Elasticsearch - RestHighLevelClient 在2.2.1以后被springboot集成 -->
                 <version>2.2.10.RELEASE</version>
                 <scope>import</scope>
                 <type>pom</type>

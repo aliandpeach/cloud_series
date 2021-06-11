@@ -26,7 +26,9 @@ public class ESTest
     @Test
     public void queryById()
     {
-        Optional<ProcessResult> resultOptional = processResultService.getById("cc496960d1eb226c0b8f37550321cf2c00");
+        ProcessResultService.INDEX_DYNAMIC.set("matching_result_ff946d3af4ed4212bd103b8495ec7fd6");
+        String name = Thread.currentThread().getName();
+        Optional<ProcessResult> resultOptional = processResultService.getById("552b7829b9670d3b93902db42aedb5a600");
         resultOptional.ifPresent(System.out::println);
     }
     @Test

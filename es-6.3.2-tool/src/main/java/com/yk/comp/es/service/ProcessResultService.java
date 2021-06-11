@@ -11,6 +11,7 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,10 @@ import java.util.Optional;
 @Service
 public class ProcessResultService
 {
+    public static final ThreadLocal<String> INDEX_DYNAMIC = new ThreadLocal<>();
+
+    @Autowired
+    private ElasticsearchRestTemplate elasticsearchRestTemplate;
 
     @Autowired
     private ProcessResultRepository processResultRepository;
@@ -89,5 +94,12 @@ public class ProcessResultService
 
         Page<ProcessResult> articles = processResultRepository.search(searchQuery);
         return articles;
+    }
+
+    public String getIndexNamePart()
+    {
+        String part = INDEX_DYNAMIC.get();
+        String name = Thread.currentThread().getName();
+        return part;
     }
 }
