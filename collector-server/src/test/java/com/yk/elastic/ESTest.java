@@ -1,7 +1,7 @@
-package com.yk.es;
+package com.yk.elastic;
 
-import com.yk.comp.es.model.ProcessResult;
-import com.yk.comp.es.service.ProcessResultService;
+import com.yk.comp.elastic.model.ProcessResult;
+import com.yk.comp.elastic.service.ProcessResultService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

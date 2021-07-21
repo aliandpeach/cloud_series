@@ -1,6 +1,6 @@
-package com.yk.comp.es.controller;
+package com.yk.comp.elastic.controller;
 
-import com.yk.comp.es.model.ProcessResult;
+import com.yk.comp.elastic.model.ProcessResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;

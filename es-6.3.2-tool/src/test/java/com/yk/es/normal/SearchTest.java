@@ -44,6 +44,9 @@ public class SearchTest extends com.yk.es.normal.AbstractService
 //        boolBuilder.must(termQueryBuilder);
 //        boolBuilder.must(rangeQueryBuilder);
         sourceBuilder.query(boolBuilder);
+        String[] include = new String[]{};
+        String[] excludes = new String[]{};
+        sourceBuilder.fetchSource(include, include);
         SearchRequest searchRequest = new SearchRequest(index);
         searchRequest.types(type);
         searchRequest.source(sourceBuilder);

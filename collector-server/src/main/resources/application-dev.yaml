@@ -8,7 +8,7 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driverClassName: com.mysql.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:13306/xywl_online_1?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC&useSSL=false
+    url: jdbc:mysql://127.0.0.1:3307/demo?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&mysqlEncoding=utf8&serverTimezone=UTC&useSSL=false&allowMultiQueries=true
     username: root
     password: root
     hikari: # 使用hikari 连接池
@@ -39,35 +39,34 @@ spring:
         min-idle: 0 # 默认连接池最小空闲的连接数，默认为 0 。允许设置 0 和 正数。
         max-wait: -1 # 连接池最大阻塞等待时间，单位：毫秒。默认为 -1 ，表示不限制。
   kafka:
-    bootstrap-servers: 192.168.31.211:9092,192.168.31.212:9092,192.168.31.213:9092 # 指定 Kafka Broker 地址，可以设置多个，以逗号分隔
+    bootstrap-servers: 192.168.31.211:9092 # 指定 Kafka Broker 地址，可以设置多个，以逗号分隔
     # Kafka Producer 配置项
     producer:
       acks: 1 # 0-不应答。1-leader 应答。all-所有 leader 和 follower 应答。
       retries: 3 # 发送失败时，重试发送的次数
       key-serializer: org.apache.kafka.common.serialization.StringSerializer # 消息的 key 的序列化
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer # 消息的 value 的序列化
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer # 消息的 value 的序列化
       batch-size: 16384 # 每次批量发送消息的最大数量
       buffer-memory: 33554432 # 每次批量发送消息的最大内存
       properties:
-        linger:
-          ms: 30000 # 批处理延迟时间上限。这里配置为 30 * 1000 ms 过后，不管是否消息数量是否到达 batch-size 或者消息大小到达 buffer-memory 后，都直接发送一次请求。
+        linger.ms: 30000 # 批处理延迟时间上限。这里配置为 30 * 1000 ms 过后，不管是否消息数量是否到达 batch-size 或者消息大小到达 buffer-memory 后，都直接发送一次请求。
+        spring.json.trusted.packages: com.yk.comp.kafka.model
       # Kafka Consumer 配置项
     consumer:
       auto-offset-reset: earliest # 设置消费者分组最初的消费进度为 earliest 。可参考博客 https://blog.csdn.net/lishuangzhe7047/article/details/74530417 理解
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       fetch-max-wait: 10000 # poll 一次拉取的阻塞的最大时长，单位：毫秒。这里指的是阻塞拉取需要满足至少 fetch-min-size 条消息
       fetch-min-size: 10 # poll 一次消息拉取的最小数量
       max-poll-records: 100 # poll 一次消息拉取的最大数量
       properties:
-        spring:
-          json:
-            trusted:
-              packages: com.yk.comp.kafka.model
+        spring.json.trusted.packages: com.yk.comp.kafka.model
+      enable-auto-commit: false
     # Kafka Consumer Listener 监听器配置
     listener:
       type: BATCH # 监听器类型，默认为 SINGLE ，只监听单条消息。这里我们配置 BATCH ，监听多条消息，批量消费
       missing-topics-fatal: false # 消费监听接口监听的主题不存在时，默认会报错。所以通过设置为 false ，解决报错
+      ack-mode: manual_immediate
   elasticsearch:
     rest:
       uris: localhost:9200
@@ -97,3 +96,6 @@ server:
     key-password: Admin@1234
     key-store-type: JKS
     key-store-password: Admin@123
+zookeeper:
+  address: 192.168.31.211:2181
+  timeout: 4000

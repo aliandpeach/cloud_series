@@ -9,12 +9,14 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
 @Component
-public class Consumer {
+public class Consumer
+{
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @KafkaListener(topics = Constants.TOPIC,
-            groupId = "demo-consumer-group-" + Constants.TOPIC)
-    public void onMessage(KafkaMessage message, Acknowledgment acknowledgment) {
+            groupId = "server-group13")
+    public void onMessage(String message, Acknowledgment acknowledgment)
+    {
         logger.info("[onMessage][线程编号:{} 消息内容：{}]", Thread.currentThread().getId(), message);
         acknowledgment.acknowledge();
     }

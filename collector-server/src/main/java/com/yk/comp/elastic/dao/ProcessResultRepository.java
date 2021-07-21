@@ -1,6 +1,6 @@
-package com.yk.comp.es.dao;
+package com.yk.comp.elastic.dao;
 
-import com.yk.comp.es.model.ProcessResult;
+import com.yk.comp.elastic.model.ProcessResult;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 import org.springframework.stereotype.Repository;
 

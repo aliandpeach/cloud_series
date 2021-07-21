@@ -1,4 +1,4 @@
-package com.yk.comp.es.model;
+package com.yk.comp.elastic.model;
 
 import lombok.Data;
 import org.springframework.data.elasticsearch.annotations.Document;

@@ -1,7 +1,7 @@
-package com.yk.comp.es.service;
+package com.yk.comp.elastic.service;
 
-import com.yk.comp.es.dao.ProcessResultRepository;
-import com.yk.comp.es.model.ProcessResult;
+import com.yk.comp.elastic.dao.ProcessResultRepository;
+import com.yk.comp.elastic.model.ProcessResult;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
