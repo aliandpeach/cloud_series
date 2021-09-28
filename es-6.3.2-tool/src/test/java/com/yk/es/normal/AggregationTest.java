@@ -2,6 +2,9 @@ package com.yk.es.normal;
 
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -32,11 +35,11 @@ public class AggregationTest extends com.yk.es.normal.AbstractService
     @Override
     public void parameters()
     {
-        super.index = "matching_result_2343bae5b8e7497083bc6c3e81885bff";
+        super.index = "matching_result_a89ff75dd9a54876ae92cf571f770a52";
         super.type = "_doc";
         
         
-        parameters.put("jobName", Arrays.asList("2343bae5b8e7497083bc6c3e81885bff").toArray(new String[0]));
+        parameters.put("jobName", Arrays.asList("a89ff75dd9a54876ae92cf571f770a52").toArray(new String[0]));
         parameters.put("orgName", Arrays.asList("").toArray(new String[0]));
         
         parameters.put("ip", Arrays.asList("").toArray(new String[0]));
@@ -118,9 +121,11 @@ public class AggregationTest extends com.yk.es.normal.AbstractService
      *   }
      * }
      *
+     *  多桶聚合
+     *
      */
     @Test
-    public void test() throws IOException
+    public void testComposite() throws IOException
     {
         System.out.println();
 
@@ -133,33 +138,45 @@ public class AggregationTest extends com.yk.es.normal.AbstractService
         queryBuilderList.add(QueryBuilders.rangeQuery(""));
         queryBuilderList.add(QueryBuilders.matchQuery("", ""));
         queryBuilderList.add(QueryBuilders.boolQuery());*/
+
+        List<QueryBuilder> queryBuilders = new ArrayList<>();
+        queryBuilders.add(QueryBuilders.termQuery("taskId.keyword", "38077361-b142-407c-b542-efa139484c1b"));
+        queryBuilders.add(QueryBuilders.termQuery("taskId.keyword", "473b0b61-2d58-4c99-bab0-00e8b9359a20"));
+
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        for (QueryBuilder queryBuilder : queryBuilders)
+        {
+            boolQueryBuilder.should(queryBuilder);
+        }
+
+//        boolQueryBuilder.must(QueryBuilders.wildcardQuery("breachContent.keyword", "*"));
+
         SearchRequest searchRequest = new SearchRequest();
         searchRequest.indices(index);
         searchRequest.types(type);
         
-        SearchSourceBuilder ssb = new SearchSourceBuilder();
-        // ssb.size(0);
-        List<CompositeValuesSourceBuilder<?>> list = new ArrayList<>();
-        list.add(new TermsValuesSourceBuilder("breachContent").field("breachContent.keyword"));
-        list.add(new TermsValuesSourceBuilder("matchContent").field("matchContent.keyword"));
-        CompositeAggregationBuilder composite = new CompositeAggregationBuilder("my_buckets", list);
-        ssb.aggregation(composite);
-        
-        String[] source = {"_id", "srcFilepath"};
-        String[] include = {};
-        // topHit的意思是，group by之后，（按照时间降序） 排序后，每个分组的第一行数据
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(boolQueryBuilder);// 查询条件
+
+        List<CompositeValuesSourceBuilder<?>> sources = new ArrayList<>();
+        TermsValuesSourceBuilder breachContent = new TermsValuesSourceBuilder("breachContent").field("breachContent.keyword").missingBucket(true); // 6.4 以后的es才支持 missingBucket
+        TermsValuesSourceBuilder matchContent = new TermsValuesSourceBuilder("matchContent").field("matchContent.keyword").missingBucket(true);
+        sources.add(breachContent);
+
+        CompositeAggregationBuilder composite = new CompositeAggregationBuilder("my_buckets", sources);
+        String[] include = {"taskId", "breachContent", "matchContent"};
+        String[] exclude = {};
         composite.subAggregation(
-                AggregationBuilders.topHits("yyy").size(1)
-                        .fetchSource(source, include)
-                        .sort(SortBuilders.fieldSort("detectDateTs").order(SortOrder.DESC)));
-        
-        composite.subAggregation(AggregationBuilders.terms("filename").field("filename.keyword"));
+                AggregationBuilders.topHits("my_top_hits_name").size(1)
+                        .fetchSource(include, exclude)
+                        .sort(SortBuilders.fieldSort("detectDateTs").order(SortOrder.DESC))
+                        .sort(SortBuilders.fieldSort("_id").order(SortOrder.DESC)));
+//        composite.subAggregation(AggregationBuilders.terms("filename").field("filename.keyword"));
         composite.size(10);
+        searchSourceBuilder.aggregation(composite);
         
-        ssb.query(QueryBuilders.wildcardQuery("breachContent.keyword", "*"));
-        
-        searchRequest.source(ssb);
-        SearchResponse response = rhlClient.search(searchRequest);
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse response = rhlClient.search(searchRequest, RequestOptions.DEFAULT);
         SearchHits searchHits = response.getHits();
         Aggregations aggregations = response.getAggregations();
         ParsedComposite my_buckets = aggregations.get("my_buckets");
@@ -172,7 +189,7 @@ public class AggregationTest extends com.yk.es.normal.AbstractService
             ParsedStringTerms stringTerms = parsedBucket.getAggregations().get("filename");
             Object obj = stringTerms.getBuckets().get(0).getKey();
             
-            ParsedTopHits topHits = parsedBucket.getAggregations().get("yyy");
+            ParsedTopHits topHits = parsedBucket.getAggregations().get("my_top_hits_name");
             SearchHit[] sh = topHits.getHits().getHits();
             
             

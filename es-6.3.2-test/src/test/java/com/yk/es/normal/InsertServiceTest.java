@@ -3,7 +3,6 @@ package com.yk.es.normal;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.support.WriteRequest;
-import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.Requests;
 import org.junit.Test;
 
@@ -41,11 +40,10 @@ public class InsertServiceTest extends AbstractService
                 {
                     BulkRequest bulkRequest = new BulkRequest();
                     IndexRequest indexRequest = Requests.indexRequest().index(index).type(type);
-                    indexRequest.source(new HashMap<>(Collections.singletonMap("1", UUID.randomUUID().toString())));
+                    indexRequest.source(new HashMap<>(Collections.singletonMap("key", UUID.randomUUID().toString())));
                     bulkRequest.add(indexRequest);
-//                  rhlClient.index(indexRequest, RequestOptions.DEFAULT);
                     bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-                    rhlClient.bulk(bulkRequest, RequestOptions.DEFAULT);
+                    rhlClient.bulk(bulkRequest);
                 }
                 catch (IOException e)
                 {
@@ -59,15 +57,16 @@ public class InsertServiceTest extends AbstractService
     }
 
     @Test
-    public void insert() throws InterruptedException
+    public void insert()
     {
         try
         {
             IndexRequest indexRequest = Requests.indexRequest().index(index).type(type);
             String value = UUID.randomUUID().toString();
             System.out.println(value);
-            indexRequest.source(new HashMap<>(Collections.singletonMap("1", value)));
-            rhlClient.index(indexRequest, RequestOptions.DEFAULT);
+            indexRequest.id(UUID.randomUUID().toString());
+            indexRequest.source(new HashMap<>(Collections.singletonMap("key", value)));
+            rhlClient.index(indexRequest);
         }
         catch (IOException e)
         {
