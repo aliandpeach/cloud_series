@@ -9,7 +9,7 @@ public abstract class AbstractService
     
     protected String type;
     
-    protected RestHighLevelClient rhlClient = com.yk.es.normal.ESClientFactory.getHighLevelClient();
+    protected RestHighLevelClient rhlClient = ESClientFactory.getHighLevelClient();
     
     
     @Before
