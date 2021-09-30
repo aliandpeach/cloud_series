@@ -5,6 +5,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.script.Script;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregation;
@@ -15,6 +16,8 @@ import org.elasticsearch.search.aggregations.bucket.composite.CompositeAggregati
 import org.elasticsearch.search.aggregations.bucket.composite.CompositeValuesSourceBuilder;
 import org.elasticsearch.search.aggregations.bucket.composite.ParsedComposite;
 import org.elasticsearch.search.aggregations.bucket.composite.TermsValuesSourceBuilder;
+import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.cardinality.ParsedCardinality;
 import org.elasticsearch.search.aggregations.metrics.tophits.ParsedTopHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
@@ -35,7 +38,7 @@ public class AggregationTest extends com.yk.es.normal.AbstractService
     @Override
     public void parameters()
     {
-        super.index = "matching_result_a89ff75dd9a54876ae92cf571f770a52";
+        super.index = "matching_result_bf4253f09bb141dc8f7099f27f66e43a";
         super.type = "_doc";
 
 
@@ -60,6 +63,108 @@ public class AggregationTest extends com.yk.es.normal.AbstractService
         parameters.put("fileType", Arrays.asList("").toArray(new String[0]));
         parameters.put("detectDateTs_endTime", Arrays.asList("").toArray(new String[0]));
         parameters.put("order", new String[]{null});
+    }
+
+    @Test
+    public void testSearchAfterPageTaskId() throws Exception
+    {
+        int offset = 2;
+        int limit = 10;
+        Object[] after = null;
+        if (offset > 0)
+        {
+            int step = 1000;
+            for (int i = 0; i <= offset; i += step)
+            {
+                int skip = i + step > offset ? offset % step : step;
+
+                Map<String, Object> afterKey = null;
+                List<QueryBuilder> queryBuilders = new ArrayList<>();
+                BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+                for (QueryBuilder queryBuilder : queryBuilders)
+                {
+                    boolQueryBuilder.should(queryBuilder);
+                }
+
+                SearchRequest searchRequest = new SearchRequest();
+                searchRequest.indices(index);
+                searchRequest.types(type);
+
+                SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+                searchSourceBuilder.query(boolQueryBuilder);// 查询条件
+                String[] names = new String[]{"taskId", "jobName", "status", "resourceType", "breachContent", "externalBreachContent", "sensitivityId", "secretRate", "matchContent", "ruleName", "filepath", "detectDateTs"};
+                searchSourceBuilder.fetchSource(names, new String[]{});
+
+                List<CompositeValuesSourceBuilder<?>> sources = new ArrayList<>();
+                TermsValuesSourceBuilder breachContent = new TermsValuesSourceBuilder("taskId").field("taskId.keyword").order("desc");
+                sources.add(breachContent);
+
+                CompositeAggregationBuilder composite = new CompositeAggregationBuilder("my_buckets", sources);
+                String[] exclude = {};
+
+                if (null != afterKey)
+                {
+                    composite.aggregateAfter(afterKey);
+                }
+
+                composite.subAggregation(
+                        AggregationBuilders.topHits("my_top_hits_name").size(100)
+                                .fetchSource(names, exclude)
+                                .sort(SortBuilders.fieldSort("detectDateTs").order(SortOrder.DESC))
+                                .sort(SortBuilders.fieldSort("_id").order(SortOrder.DESC)));
+                composite.size(limit);
+                searchSourceBuilder.aggregation(composite);
+
+                Script script = new Script("doc['taskId.keyword'].values");
+                CardinalityAggregationBuilder cardinalityAggregationBuilder =
+                        AggregationBuilders.cardinality("task_id_group_count").script(script).precisionThreshold(40000);
+                searchSourceBuilder.aggregation(cardinalityAggregationBuilder);
+
+                searchRequest.source(searchSourceBuilder);
+                SearchResponse response = rhlClient.search(searchRequest);
+                SearchHits searchHits = response.getHits();
+                SearchHit[] resultSearchHitAry = searchHits.getHits();
+
+                Aggregations aggregations = response.getAggregations();
+                ParsedComposite my_buckets = aggregations.get("my_buckets");
+                afterKey = my_buckets.afterKey();
+                if (afterKey == null)
+                {
+                    return;
+                }
+
+                ParsedCardinality eCountAggregator = aggregations.get("task_id_group_count");
+                long total = eCountAggregator.getValue();
+                if (total < offset)
+                {
+                    return;
+                }
+
+                List<ParsedComposite.ParsedBucket> buckets = my_buckets.getBuckets();
+                for (ParsedComposite.ParsedBucket parsedBucket : buckets)
+                {
+                    Map<String, Object> keys = parsedBucket.getKey();
+
+                    Aggregations aggs = parsedBucket.getAggregations();
+                    Aggregation aggregation = aggs.get("my_top_hits_name");
+
+                    if (aggregation instanceof ParsedTopHits)
+                    {
+                        SearchHits searchHitsAgg = ((ParsedTopHits) aggregation).getHits();
+                        SearchHit[] aggHitAry = searchHitsAgg.getHits();
+                        for (SearchHit h : aggHitAry)
+                        {
+                            System.out.println(h.getSourceAsMap());
+                        }
+                    }
+                    System.out.println();
+                }
+            }
+        }
+        else
+        {
+
+        }
     }
 
     @Test
