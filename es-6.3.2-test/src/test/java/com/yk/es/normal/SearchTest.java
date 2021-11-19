@@ -117,6 +117,7 @@ public class SearchTest extends com.yk.es.normal.AbstractService
             for (SearchHit h : hits)
             {
                 System.out.println(h.getSourceAsMap());
+                Object[] after = h.getSortValues();
             }
         }
         catch (IOException e)

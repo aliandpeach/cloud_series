@@ -27,6 +27,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,7 @@ public class AggregationTest extends com.yk.es.normal.AbstractService
     @Override
     public void parameters()
     {
-        super.index = "matching_result_bf4253f09bb141dc8f7099f27f66e43a";
+        super.index = "matching_result_0560ec07891f472980b78dcb2fa9a29c";
         super.type = "_doc";
 
 
@@ -66,105 +67,115 @@ public class AggregationTest extends com.yk.es.normal.AbstractService
     }
 
     @Test
-    public void testSearchAfterPageTaskId() throws Exception
+    public void testQueryPage() throws Exception
     {
-        int offset = 2;
+        // 假设总数为47条, if中的循环则是为了找到第46条, 进而确定 aggregateAfter
+        int offset = 46;
         int limit = 10;
-        Object[] after = null;
+        Map<String, Object> after = null;
         if (offset > 0)
         {
-            int step = 1000;
-            for (int i = 0; i <= offset; i += step)
+            int step = 20;
+            int count = offset % step > 0 ? offset / step + 1 : offset / step;
+            for (int i = 1; i < count; i++)
             {
-                int skip = i + step > offset ? offset % step : step;
-
-                Map<String, Object> afterKey = null;
-                List<QueryBuilder> queryBuilders = new ArrayList<>();
-                BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-                for (QueryBuilder queryBuilder : queryBuilders)
-                {
-                    boolQueryBuilder.should(queryBuilder);
-                }
-
-                SearchRequest searchRequest = new SearchRequest();
-                searchRequest.indices(index);
-                searchRequest.types(type);
-
-                SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-                searchSourceBuilder.query(boolQueryBuilder);// 查询条件
-                String[] names = new String[]{"taskId", "jobName", "status", "resourceType", "breachContent", "externalBreachContent", "sensitivityId", "secretRate", "matchContent", "ruleName", "filepath", "detectDateTs"};
-                searchSourceBuilder.fetchSource(names, new String[]{});
-
-                List<CompositeValuesSourceBuilder<?>> sources = new ArrayList<>();
-                TermsValuesSourceBuilder breachContent = new TermsValuesSourceBuilder("taskId").field("taskId.keyword").order("desc");
-                sources.add(breachContent);
-
-                CompositeAggregationBuilder composite = new CompositeAggregationBuilder("my_buckets", sources);
-                String[] exclude = {};
-
-                if (null != afterKey)
-                {
-                    composite.aggregateAfter(afterKey);
-                }
-
-                composite.subAggregation(
-                        AggregationBuilders.topHits("my_top_hits_name").size(100)
-                                .fetchSource(names, exclude)
-                                .sort(SortBuilders.fieldSort("detectDateTs").order(SortOrder.DESC))
-                                .sort(SortBuilders.fieldSort("_id").order(SortOrder.DESC)));
-                composite.size(limit);
-                searchSourceBuilder.aggregation(composite);
-
-                Script script = new Script("doc['taskId.keyword'].values");
-                CardinalityAggregationBuilder cardinalityAggregationBuilder =
-                        AggregationBuilders.cardinality("task_id_group_count").script(script).precisionThreshold(40000);
-                searchSourceBuilder.aggregation(cardinalityAggregationBuilder);
-
-                searchRequest.source(searchSourceBuilder);
-                SearchResponse response = rhlClient.search(searchRequest);
-                SearchHits searchHits = response.getHits();
-                SearchHit[] resultSearchHitAry = searchHits.getHits();
-
-                Aggregations aggregations = response.getAggregations();
-                ParsedComposite my_buckets = aggregations.get("my_buckets");
-                afterKey = my_buckets.afterKey();
-                if (afterKey == null)
+                int skip = i * step > offset ? offset % step : step;
+                ResultPage result = testSearchAfterPageTaskId(skip, after);
+                after = result.getAfter();
+                if (offset >= result.getTotal())
                 {
                     return;
-                }
-
-                ParsedCardinality eCountAggregator = aggregations.get("task_id_group_count");
-                long total = eCountAggregator.getValue();
-                if (total < offset)
-                {
-                    return;
-                }
-
-                List<ParsedComposite.ParsedBucket> buckets = my_buckets.getBuckets();
-                for (ParsedComposite.ParsedBucket parsedBucket : buckets)
-                {
-                    Map<String, Object> keys = parsedBucket.getKey();
-
-                    Aggregations aggs = parsedBucket.getAggregations();
-                    Aggregation aggregation = aggs.get("my_top_hits_name");
-
-                    if (aggregation instanceof ParsedTopHits)
-                    {
-                        SearchHits searchHitsAgg = ((ParsedTopHits) aggregation).getHits();
-                        SearchHit[] aggHitAry = searchHitsAgg.getHits();
-                        for (SearchHit h : aggHitAry)
-                        {
-                            System.out.println(h.getSourceAsMap());
-                        }
-                    }
-                    System.out.println();
                 }
             }
         }
-        else
-        {
+        ResultPage result = testSearchAfterPageTaskId(limit, after);
+        System.out.println(result);
+    }
 
+    public ResultPage testSearchAfterPageTaskId(int limit, Map<String, Object> afterKey) throws Exception
+    {
+        ResultPage result = new ResultPage();
+        List<QueryBuilder> queryBuilders = new ArrayList<>();
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        for (QueryBuilder queryBuilder : queryBuilders)
+        {
+            boolQueryBuilder.should(queryBuilder);
         }
+
+        SearchRequest searchRequest = new SearchRequest();
+        searchRequest.indices(index);
+        searchRequest.types(type);
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(boolQueryBuilder);// 查询条件
+        String[] names = new String[]{"taskId", "jobName", "status", "resourceType", "breachContent", "externalBreachContent", "sensitivityId", "secretRate", "matchContent", "ruleName", "filepath", "detectDateTs"};
+        searchSourceBuilder.fetchSource(names, new String[]{});
+
+        List<CompositeValuesSourceBuilder<?>> sources = new ArrayList<>();
+        TermsValuesSourceBuilder breachContent = new TermsValuesSourceBuilder("taskId")
+                .field("taskId.keyword")
+                .order("desc");
+        sources.add(breachContent);
+
+        CompositeAggregationBuilder composite = new CompositeAggregationBuilder("my_buckets", sources);
+        String[] exclude = {};
+
+        if (null != afterKey)
+        {
+            composite.aggregateAfter(afterKey);
+        }
+
+        composite.subAggregation(
+                AggregationBuilders.topHits("my_top_hits_name").size(100)
+                        .fetchSource(names, exclude)
+                        .sort(SortBuilders.fieldSort("detectDateTs").order(SortOrder.DESC))
+                        .sort(SortBuilders.fieldSort("_id").order(SortOrder.DESC)));
+        composite.size(limit);
+        searchSourceBuilder.aggregation(composite);
+
+        Script script = new Script("doc['taskId.keyword'].values");
+        CardinalityAggregationBuilder cardinalityAggregationBuilder =
+                AggregationBuilders.cardinality("task_id_group_count").script(script).precisionThreshold(40000);
+        searchSourceBuilder.aggregation(cardinalityAggregationBuilder);
+
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse response = rhlClient.search(searchRequest);
+        SearchHits searchHits = response.getHits();
+        SearchHit[] resultSearchHitAry = searchHits.getHits();
+
+        Aggregations aggregations = response.getAggregations();
+        ParsedComposite my_buckets = aggregations.get("my_buckets");
+        afterKey = my_buckets.afterKey();
+        result.setAfter(afterKey);
+
+        ParsedCardinality eCountAggregator = aggregations.get("task_id_group_count");
+        long total = eCountAggregator.getValue();
+        result.setTotal(total);
+
+        List<ParsedComposite.ParsedBucket> buckets = my_buckets.getBuckets();
+        List<List<Map<String, Object>>> data = new ArrayList<>();
+        for (ParsedComposite.ParsedBucket parsedBucket : buckets)
+        {
+            Map<String, Object> keys = parsedBucket.getKey();
+
+            Aggregations aggs = parsedBucket.getAggregations();
+            Aggregation aggregation = aggs.get("my_top_hits_name");
+
+            List<Map<String, Object>> taskIdAggs = new ArrayList<>();
+            if (aggregation instanceof ParsedTopHits)
+            {
+                SearchHits searchHitsAgg = ((ParsedTopHits) aggregation).getHits();
+                SearchHit[] aggHitAry = searchHitsAgg.getHits();
+
+                for (SearchHit h : aggHitAry)
+                {
+                    taskIdAggs.add(h.getSourceAsMap());
+                }
+            }
+            data.add(taskIdAggs);
+        }
+        result.setData(data);
+        return result;
     }
 
     @Test
@@ -175,8 +186,8 @@ public class AggregationTest extends com.yk.es.normal.AbstractService
         Map<String, Object> afterKey = null;
 
         List<QueryBuilder> queryBuilders = new ArrayList<>();
-        queryBuilders.add(QueryBuilders.termQuery("taskId.keyword", "38077361-b142-407c-b542-efa139484c1b"));
-        queryBuilders.add(QueryBuilders.termQuery("taskId.keyword", "473b0b61-2d58-4c99-bab0-00e8b9359a20"));
+//        queryBuilders.add(QueryBuilders.termQuery("taskId.keyword", "38077361-b142-407c-b542-efa139484c1b"));
+//        queryBuilders.add(QueryBuilders.termQuery("taskId.keyword", "473b0b61-2d58-4c99-bab0-00e8b9359a20"));
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         for (QueryBuilder queryBuilder : queryBuilders)
@@ -195,7 +206,7 @@ public class AggregationTest extends com.yk.es.normal.AbstractService
         searchSourceBuilder.fetchSource(new String[]{"taskId", "breachContent", "matchContent"}, new String[]{});
 
         List<CompositeValuesSourceBuilder<?>> sources = new ArrayList<>();
-        TermsValuesSourceBuilder breachContent = new TermsValuesSourceBuilder("taskId").field("taskId.keyword"); // .missingBucket(true); // 6.4 以后的es才支持 missingBucket
+        TermsValuesSourceBuilder breachContent = new TermsValuesSourceBuilder("taskId").field("taskId.keyword").order("desc"); // .missingBucket(true); // 6.4 以后的es才支持 missingBucket
         sources.add(breachContent);
 
         CompositeAggregationBuilder composite = new CompositeAggregationBuilder("my_buckets", sources);
@@ -212,6 +223,11 @@ public class AggregationTest extends com.yk.es.normal.AbstractService
 //        composite.subAggregation(AggregationBuilders.terms("filename").field("filename.keyword"));
         composite.size(pageSize);// buckets size
         searchSourceBuilder.aggregation(composite);
+
+        Script script = new Script("doc['taskId.keyword'].values");
+        CardinalityAggregationBuilder cardinalityAggregationBuilder =
+                AggregationBuilders.cardinality("task_id_group_count").script(script).precisionThreshold(40000);
+        searchSourceBuilder.aggregation(cardinalityAggregationBuilder);
 
         searchRequest.source(searchSourceBuilder);
         SearchResponse response = rhlClient.search(searchRequest);
@@ -435,5 +451,44 @@ public class AggregationTest extends com.yk.es.normal.AbstractService
 
         Aggregations aggregations = response.getAggregations();
         System.out.println();
+    }
+
+    public static class ResultPage
+    {
+        private long total;
+
+        private Map<String, Object> after;
+
+        private List<List<Map<String, Object>>> data;
+
+        public List<List<Map<String, Object>>> getData()
+        {
+            return data;
+        }
+
+        public void setData(List<List<Map<String, Object>>> data)
+        {
+            this.data = data;
+        }
+
+        public long getTotal()
+        {
+            return total;
+        }
+
+        public void setTotal(long total)
+        {
+            this.total = total;
+        }
+
+        public Map<String, Object> getAfter()
+        {
+            return after;
+        }
+
+        public void setAfter(Map<String, Object> after)
+        {
+            this.after = after;
+        }
     }
 }
