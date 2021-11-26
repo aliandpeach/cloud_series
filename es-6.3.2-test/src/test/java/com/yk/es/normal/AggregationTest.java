@@ -367,8 +367,8 @@ public class AggregationTest extends com.yk.es.normal.AbstractService
     public void testAggregations() throws IOException
     {
         List<QueryBuilder> queryBuilders = new ArrayList<>();
-        queryBuilders.add(QueryBuilders.termQuery("taskId.keyword", "38077361-b142-407c-b542-efa139484c1b"));
-        queryBuilders.add(QueryBuilders.termQuery("taskId.keyword", "473b0b61-2d58-4c99-bab0-00e8b9359a20"));
+//        queryBuilders.add(QueryBuilders.termQuery("taskId.keyword", "38077361-b142-407c-b542-efa139484c1b"));
+//        queryBuilders.add(QueryBuilders.termQuery("taskId.keyword", "473b0b61-2d58-4c99-bab0-00e8b9359a20"));
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         for (QueryBuilder queryBuilder : queryBuilders)
@@ -396,6 +396,11 @@ public class AggregationTest extends com.yk.es.normal.AbstractService
                 .sort(SortBuilders.fieldSort("_id").order(SortOrder.DESC)));
         searchSourceBuilder.aggregation(taskIdTermsBuilder);
 
+        Script script = new Script("doc['taskId.keyword'].values");
+        CardinalityAggregationBuilder cardinalityAggregationBuilder =
+                AggregationBuilders.cardinality("task_id_group_count").script(script).precisionThreshold(40000);
+        searchSourceBuilder.aggregation(cardinalityAggregationBuilder);
+
         searchRequest.source(searchSourceBuilder);
         SearchResponse response = rhlClient.search(searchRequest);
         SearchHits searchHits = response.getHits();
@@ -414,8 +419,8 @@ public class AggregationTest extends com.yk.es.normal.AbstractService
     public void testTermsAggregations() throws IOException
     {
         List<QueryBuilder> queryBuilders = new ArrayList<>();
-        queryBuilders.add(QueryBuilders.termQuery("taskId.keyword", "38077361-b142-407c-b542-efa139484c1b"));
-        queryBuilders.add(QueryBuilders.termQuery("taskId.keyword", "473b0b61-2d58-4c99-bab0-00e8b9359a20"));
+//        queryBuilders.add(QueryBuilders.termQuery("taskId.keyword", "38077361-b142-407c-b542-efa139484c1b"));
+//        queryBuilders.add(QueryBuilders.termQuery("taskId.keyword", "473b0b61-2d58-4c99-bab0-00e8b9359a20"));
 
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         for (QueryBuilder queryBuilder : queryBuilders)
