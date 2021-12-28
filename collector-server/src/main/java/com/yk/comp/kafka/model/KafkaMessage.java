@@ -1,16 +1,19 @@
 package com.yk.comp.kafka.model;
 
+import lombok.Data;
+
+@Data
 public class KafkaMessage<T>
 {
-    private T message;
+    private T data;
 
-    public T getMessage()
+    KafkaMessage(T data)
     {
-        return message;
+        this.data = data;
     }
 
-    public void setMessage(T message)
+    public static <T> KafkaMessage<T> of(T data)
     {
-        this.message = message;
+        return new KafkaMessage<T>(data);
     }
 }

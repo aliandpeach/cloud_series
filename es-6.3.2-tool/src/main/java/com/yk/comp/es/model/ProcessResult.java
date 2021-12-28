@@ -26,8 +26,8 @@ import org.springframework.data.elasticsearch.annotations.Document;
  *    but delete files on your computer.
  */
 @Data
-//@Document(indexName = "#{@processResultService.getIndexNamePart()}", type = "_doc")
-@Document(indexName = "matching_result_ff946d3af4ed4212bd103b8495ec7fd6", type = "_doc")
+@Document(indexName = "#{@processResultService.getIndexNamePart()}", type = "_doc")
+//@Document(indexName = "matching_result_ff946d3af4ed4212bd103b8495ec7fd6", type = "_doc")
 public class ProcessResult
 {
     private float score;

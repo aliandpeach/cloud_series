@@ -21,13 +21,14 @@ public class Producer
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
 
-    public SendResult<String, String> asyncSend(Integer id) throws ExecutionException, InterruptedException
+    public String send(KafkaMessage<String> kafkaMessage, boolean async) throws ExecutionException, InterruptedException
     {
-        KafkaMessage<String> message = new KafkaMessage<>();
-        message.setMessage("{\"test\":\"123\"}");
-
         //发送消息
-        ListenableFuture<SendResult<String, String>> future = kafkaTemplate.send(Constants.TOPIC, "{\"test\":\"123\"}");
+        ListenableFuture<SendResult<String, String>> future = kafkaTemplate.send(Constants.TOPIC, kafkaMessage.getData());
+        if (async)
+        {
+            return "OK";
+        }
         future.addCallback(new ListenableFutureCallback<SendResult<String, String>>()
         {
             @Override
@@ -45,6 +46,7 @@ public class Producer
             }
         });
         SendResult<String, String> sc = future.get();
-        return sc;
+        logger.info(Constants.TOPIC + " - 生产者 发送消息结果：" + sc);
+        return sc.toString();
     }
 }
