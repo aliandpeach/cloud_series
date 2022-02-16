@@ -47,4 +47,14 @@ public class QueueTest
         link.take(); //一直等待
         System.out.println(link);
     }
+
+    @Test
+    public void testPoll() throws InterruptedException
+    {
+        IntStream.range(0, 10).forEach(t -> System.out.println(t));
+        System.out.println(1 % 5);
+        BlockingQueue<String> link = new LinkedBlockingQueue<>(2);
+        String r = link.poll();
+        System.out.println(link);
+    }
 }
