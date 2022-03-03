@@ -12,11 +12,7 @@ public class MsgClassLoaderTest {
             AbstractConsumerFactory t = (AbstractConsumerFactory)clazz.newInstance();
             t.getConsumer(null);
             System.out.println("");
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }

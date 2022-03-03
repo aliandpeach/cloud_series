@@ -21,14 +21,14 @@ import java.util.concurrent.Future;
 
 public class ProducerImplTest
 {
-    
+
     private static ExecutorService executor = Executors.newFixedThreadPool(10);
-    
+
     @Test
-    public void test() throws ExecutionException, InterruptedException
+    public void test()
     {
         Map<String, Object> params = new HashMap<>();
-        IProducer<String, String> producer = new ProducerFactory<String, String>().getProducer(params);
+        IProducer<String, String> producer = new ProducerFactory().getProducer(params);
         List<Future<RecordMetadata>> futureList = producer.send(new ProducerRecord<String, String>("testz", "test1-" + new Random().nextDouble()),
                 new Callback()
                 {
@@ -39,7 +39,7 @@ public class ProducerImplTest
                     }
                 }
         );
-        
+
         futureList = producer.send(new ProducerRecord<String, String>("testz", "test2-" + new Random().nextDouble()),
                 new Callback()
                 {
@@ -51,8 +51,8 @@ public class ProducerImplTest
                 }
         );
         // producer.close(); // 必须调用close 否则需要给足够的时间到当前主线程，或者调用future.get(),确保已经消息已经发送出去
-        
-        
+
+
         List<CompletableFuture<RecordMetadata>> completableFutures = new ArrayList<>();
         Optional.ofNullable(futureList).ifPresent(futures -> futures.forEach(future ->
         {
@@ -72,7 +72,7 @@ public class ProducerImplTest
         }));
         // 等待所有 supplyAsync 线程执行完毕
         CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).join();
-        
+
         // CompletableFuture介绍
         // https://www.jianshu.com/p/fa7b86130a4d?from=timeline&isappinstalled=0
     }

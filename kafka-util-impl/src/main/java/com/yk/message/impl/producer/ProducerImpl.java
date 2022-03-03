@@ -22,9 +22,10 @@ public class ProducerImpl<K, V> implements IProducer<K, V>
     
     private Properties props;
     
-    public ProducerImpl(Map<String, Object> params)
+    public ProducerImpl(Properties properties)
     {
         props = ConfigUtil.producerConfigs();
+        props.putAll(properties);
     }
     
     public List<Future<RecordMetadata>> send(ProducerRecord<K, V> producerRecord)

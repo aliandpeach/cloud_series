@@ -4,21 +4,20 @@ import com.yk.message.api.consumer.IConsumer;
 import com.yk.message.api.factory.AbstractConsumerFactory;
 import com.yk.message.impl.consumer.ConsumerImpl;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
-public class ConsumerFactory<K, V> extends AbstractConsumerFactory<K, V>
+public class ConsumerFactory extends AbstractConsumerFactory
 {
     @Override
-    public IConsumer<K, V> getConsumer(Map<String, Object> customerParams)
+    public <K, V> IConsumer<K, V> getConsumer(Map<String, Object> customerParams)
     {
-        Properties pro = new Properties();
-        Optional.ofNullable(customerParams).ifPresent(t -> t.entrySet().stream().map(s ->
-        {
-            pro.put(s.getKey(), s.getValue());
-            return pro;
-        }));
-        return new ConsumerImpl<K, V>(pro);
+        Properties properties = new Properties();
+        Optional.ofNullable(customerParams).orElse(new HashMap<>()).forEach(properties::put);
+        return new ConsumerImpl<K, V>(properties);
     }
 }
