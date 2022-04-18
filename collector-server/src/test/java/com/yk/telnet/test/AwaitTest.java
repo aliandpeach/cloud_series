@@ -2,6 +2,7 @@ package com.yk.telnet.test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -67,7 +68,7 @@ public class AwaitTest
         executor.shutdownNow();
     }
 
-    public static void main(String args[]) throws InterruptedException
+    public static void main8(String args[]) throws InterruptedException
     {
         boolean run = true;
         List<String> list = new ArrayList<>();
@@ -103,6 +104,54 @@ public class AwaitTest
         // 或者线程都处于wait sleep 等状态也可立即退出 (shutdown()方法则不能)
         // 定时任务内部线程都处于wait中，主线程执行到此处时线程池会立即退出 (本例中 shutdown()方法不能停止线程池)
         executor.shutdownNow();
+    }
+
+
+    public static void main(String args[])
+    {
+        ExecutorService executor = Executors.newFixedThreadPool(1);
+        CompletableFuture.runAsync(() ->
+        {
+            System.out.println(111);
+            CompletableFuture.runAsync(() ->
+            {
+//                sleep();
+                System.out.println(222);
+            }, executor);
+            CompletableFuture.runAsync(() ->
+            {
+//                sleep();
+                System.out.println(333);
+            }, executor);
+            CompletableFuture.runAsync(() ->
+            {
+//                sleep();
+                System.out.println(444);
+            }, executor);
+
+            CompletableFuture.runAsync(() ->
+            {
+                System.out.println(555);
+            }, executor);
+            CompletableFuture.runAsync(() ->
+            {
+                System.out.println(666);
+            }, executor);
+
+            executor.shutdown();
+        }, executor);
+    }
+
+    private static void sleep()
+    {
+        try
+        {
+            TimeUnit.SECONDS.sleep(5);
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     public static void main3(String args[]) throws InterruptedException
