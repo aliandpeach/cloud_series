@@ -31,6 +31,7 @@ import java.util.Optional;
 @Service
 public class ProcessResultService
 {
+    // 线程池中的线程副本可能会有线程安全问题, 因为线程池中的线程是复用的
     public static final ThreadLocal<String> INDEX_DYNAMIC = new ThreadLocal<>();
 
     @Autowired

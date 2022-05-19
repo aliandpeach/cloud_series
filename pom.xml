@@ -20,6 +20,7 @@
         <module>kafka-util-impl</module>
         <module>collector-server</module>
         <module>es-6.3.2-tool</module>
+        <module>es-6.3.2-test</module>
     </modules>
     <dependencies>
         <dependency>
