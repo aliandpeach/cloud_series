@@ -1,2 +1,5 @@
 target
 .idea
+task-scan-service
+task-parsing-service
+task-matching-service
